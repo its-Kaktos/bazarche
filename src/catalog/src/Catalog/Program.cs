@@ -1,12 +1,17 @@
+using Catalog.Common.Behaviours;
+using Catalog.Common.Middlewares;
 using FluentValidation;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+
 // TODO use source generation instead of assembly scanning?
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-// TODO configure MeditR pipeline, validation, performance logging and such.
 
 var app = builder.Build();
 
@@ -14,6 +19,12 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseExceptionHandlerMiddleware();
+}
+
+app.UseValidationFailureHandlerMiddleware();
 
 app.UseHttpsRedirection();
 
