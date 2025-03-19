@@ -1,12 +1,15 @@
+using FluentValidation;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+// TODO use source generation instead of assembly scanning?
+builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+// TODO configure MeditR pipeline, validation, performance logging and such.
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
