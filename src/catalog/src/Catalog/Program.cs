@@ -1,11 +1,20 @@
 using Catalog.Common.Behaviours;
 using Catalog.Common.Middlewares;
+using Catalog.Infrastructure;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+// TODO use vertical slice?
+// TODO add a filed to be used as concurrency token on entities
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+
+builder.Services.AddDbContextPool<CatalogDbContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("defaultConnectionString"),
+        x=>x.MigrationsHistoryTable("__ef_migrations_history", CatalogDbContext.DefaultSchemaName)));
 
 // TODO use source generation instead of assembly scanning?
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<Program>());
@@ -24,6 +33,7 @@ else
     app.UseExceptionHandlerMiddleware();
 }
 
+// TODO use IExceptionHandler instead of middlewares
 app.UseValidationFailureHandlerMiddleware();
 
 app.UseHttpsRedirection();
