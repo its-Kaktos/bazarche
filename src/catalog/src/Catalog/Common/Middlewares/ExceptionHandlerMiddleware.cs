@@ -33,20 +33,9 @@ public class ExceptionHandlerMiddleware : IMiddleware
 
                 return;
             }
-
-            context.Response.StatusCode = 500;
-            context.Response.Headers.Append("content-type", "application/json");
-
-            // TODO create a type for errors or use default asp.net core error template
-            var json = JsonSerializer.Serialize(new FailedResultType
-            {
-                ErrorType = "InternalServerError",
-                Message = "An unhandled exception occured while processing the request",
-                // TODO if an API gateway is introduced, use a unique identifier that is set by the API gateway
-                TraceIdentifier = context.TraceIdentifier
-            });
-
-            await context.Response.WriteAsync(json);
+            
+            var internalServerError = TypedResults.InternalServerError("An unhandled exception occured while processing the request");
+            await internalServerError.ExecuteAsync(context);
         }
     }
 }
