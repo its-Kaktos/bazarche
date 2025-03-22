@@ -1,5 +1,5 @@
+using Catalog.Common;
 using Catalog.Common.Behaviours;
-using Catalog.Common.Middlewares;
 using Catalog.Infrastructure;
 using FluentValidation;
 using MediatR;
@@ -21,20 +21,16 @@ builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<Progra
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-else
-{
-    app.UseExceptionHandlerMiddleware();
-}
-
-// TODO use IExceptionHandler instead of middlewares
-app.UseValidationFailureHandlerMiddleware();
 
 app.UseHttpsRedirection();
 
